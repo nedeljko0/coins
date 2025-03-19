@@ -7,11 +7,12 @@ import { useBitcoinPrice } from '../hooks/useBitcoinPrice';
 import { formatCurrency } from '../utils/formatters';
 import TradeModal from '../components/modals/TradeModal';
 import { RootState } from '../store';
+import { TransactionList } from '../components/TransactionList';
 
 export default function HomeScreen() {
   const [isTradeModalVisible, setTradeModalVisible] = useState(false);
   const { currentPrice } = useBitcoinPrice();
-  const { btcAmount, profitLoss } = useSelector(
+  const { btcAmount, profitLoss, balance } = useSelector(
     (state: RootState) => state.portfolio,
   );
 
@@ -29,7 +30,7 @@ export default function HomeScreen() {
             <Text style={styles.balanceLabel}>Available</Text>
             <Text style={styles.balanceAmount}>{btcAmount.toFixed(8)} BTC</Text>
             <Text style={styles.balanceEur}>
-              {formatCurrency(btcAmount * (currentPrice || 0), 'EUR')}
+              {formatCurrency(balance, 'EUR')}
             </Text>
           </View>
         </View>
@@ -53,6 +54,7 @@ export default function HomeScreen() {
           onPress={() => setTradeModalVisible(true)}>
           <Text style={styles.tradeButtonText}>Trade</Text>
         </TouchableOpacity>
+        <TransactionList />
 
         <TradeModal
           visible={isTradeModalVisible}

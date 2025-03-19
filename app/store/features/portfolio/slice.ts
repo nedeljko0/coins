@@ -35,6 +35,7 @@ export const portfolioSlice = createSlice({
       }
 
       const total = amount * price;
+
       const canExecute =
         type === 'buy' ? state.balance >= total : state.btcAmount >= amount;
 
@@ -47,7 +48,7 @@ export const portfolioSlice = createSlice({
           state.btcAmount -= amount;
         }
 
-        state.transactions.push({
+        state.transactions.unshift({
           id: Date.now().toString(),
           type,
           amount,
