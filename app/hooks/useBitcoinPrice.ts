@@ -29,7 +29,7 @@ export const useBitcoinPrice = () => {
 
   return {
     currentPrice: currentPrice ? parseFloat(currentPrice.last) : null,
-    historicalData,
+    historicalData: historicalData ? historicalData.map(d => d.price) : null,
     isPriceLoading,
     isHistoricalLoading,
   };

@@ -21,12 +21,19 @@ export const api = {
   },
 
   getHistoricalData: async (): Promise<HistoricalData[]> => {
+    // Use 30-minute intervals (1800 seconds) for the past 24 hours
     const response = await axios.get(
-      `${BITSTAMP_API_BASE}/transactions/btceur/`,
+      `${BITSTAMP_API_BASE}/ohlc/btceur/?step=1800&limit=48`,
     );
-    return response.data.map((item: any) => ({
-      timestamp: parseInt(item.date, 10) * 1000,
-      price: parseFloat(item.price),
-    }));
+
+    if (response.data && response.data.data && response.data.data.ohlc) {
+      // Map to our historical data format, using the closing price
+      return response.data.data.ohlc.map((item: any) => ({
+        timestamp: parseInt(item.timestamp, 10) * 1000,
+        price: parseFloat(item.close),
+      }));
+    }
+
+    return [];
   },
 };

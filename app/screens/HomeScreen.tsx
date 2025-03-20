@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { useBitcoinPrice } from '../hooks/useBitcoinPrice';
+import { PriceChart } from '../components/Chart';
 
 import { formatCurrency } from '../utils/formatters';
 import TradeModal from '../components/modals/TradeModal';
@@ -11,7 +12,7 @@ import { TransactionList } from '../components/TransactionList';
 
 export default function HomeScreen() {
   const [isTradeModalVisible, setTradeModalVisible] = useState(false);
-  const { currentPrice } = useBitcoinPrice();
+  const { currentPrice, historicalData } = useBitcoinPrice();
   const { btcAmount, profitLoss, balance } = useSelector(
     (state: RootState) => state.portfolio,
   );
@@ -40,6 +41,7 @@ export default function HomeScreen() {
           <Text style={styles.priceText}>
             {currentPrice ? formatCurrency(currentPrice, 'EUR') : '...'}
           </Text>
+
           <Text
             style={[
               styles.pnlText,
@@ -48,6 +50,7 @@ export default function HomeScreen() {
             PnL: {formatCurrency(profitLoss, 'EUR')}
           </Text>
         </View>
+        {historicalData && <PriceChart data={historicalData} />}
 
         <TouchableOpacity
           style={styles.tradeButton}
@@ -136,7 +139,7 @@ const styles = StyleSheet.create({
   tradeButton: {
     backgroundColor: '#153243',
     marginHorizontal: 16,
-    marginVertical: 24,
+    marginVertical: 4,
     padding: 16,
     borderRadius: 8,
     alignItems: 'center',

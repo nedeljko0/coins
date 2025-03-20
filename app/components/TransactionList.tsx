@@ -60,6 +60,7 @@ const styles = StyleSheet.create({
     paddingVertical: 16,
     flexGrow: 0,
     flexShrink: 1,
+    marginVertical: 16,
   },
   transactionItem: {
     flexDirection: 'row',
