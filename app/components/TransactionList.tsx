@@ -14,16 +14,12 @@ export function TransactionList() {
     const isPositive = item.type === 'buy';
     const btcAmount = `${isPositive ? '+' : '-'}${item.amount.toFixed(4)} BTC`;
     const totalEurAmount = item.amount * item.price;
-    const eurAmount = `${totalEurAmount.toFixed(2)} €`;
+    const eurAmount = `${isPositive ? '+' : '-'}${totalEurAmount.toFixed(2)} €`;
 
     return (
       <View style={styles.transactionItem}>
         <View style={styles.leftContent}>
-          <Text
-            style={[
-              styles.type,
-              isPositive ? styles.buyText : styles.sellText,
-            ]}>
+          <Text style={styles.type}>
             {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
           </Text>
           <Text style={styles.amount}>
@@ -79,14 +75,7 @@ const styles = StyleSheet.create({
   },
   type: {
     fontSize: 13,
-    fontWeight: '500',
     width: 28,
-  },
-  buyText: {
-    color: '#10B981',
-  },
-  sellText: {
-    color: '#EF4444',
   },
   amount: {
     fontSize: 13,

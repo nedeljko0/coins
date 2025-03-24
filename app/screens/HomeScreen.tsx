@@ -12,7 +12,8 @@ import { TransactionList } from '../components/TransactionList';
 
 export default function HomeScreen() {
   const [isTradeModalVisible, setTradeModalVisible] = useState(false);
-  const { currentPrice, historicalData } = useBitcoinPrice();
+  const { currentPrice, historicalData, prevClose, priceChange } =
+    useBitcoinPrice();
   const { btcAmount, profitLoss, balance } = useSelector(
     (state: RootState) => state.portfolio,
   );
@@ -50,7 +51,13 @@ export default function HomeScreen() {
             PnL: {formatCurrency(profitLoss, 'EUR')}
           </Text>
         </View>
-        {historicalData && <PriceChart data={historicalData} />}
+        {historicalData && (
+          <PriceChart
+            data={historicalData}
+            prevClose={prevClose}
+            priceChange={priceChange}
+          />
+        )}
 
         <TouchableOpacity
           style={styles.tradeButton}
