@@ -1,10 +1,17 @@
-import { useQuery } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
+import { NativeEventEmitter, NativeModules } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { api, HistoricalData } from '../services/api';
 import { updateProfitLoss } from '../store/features/portfolio';
+import { useQuery } from '@tanstack/react-query';
 
-const PRICE_REFRESH_INTERVAL = 10000;
+const { BitcoinPriceModule } = NativeModules;
+
+if (!BitcoinPriceModule) {
+  console.error('[useBitcoinPrice] BitcoinPriceModule is not available');
+}
+
+const eventEmitter = new NativeEventEmitter(BitcoinPriceModule);
 
 interface PriceStats {
   currentPrice: number | null;
@@ -20,24 +27,69 @@ interface PriceStats {
 
 export const useBitcoinPrice = (): PriceStats => {
   const dispatch = useDispatch();
+  const [currentPrice, setCurrentPrice] = useState<number | null>(null);
+  const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const { data: currentPrice, isLoading: isPriceLoading } = useQuery({
-    queryKey: ['bitcoinPrice'],
-    queryFn: api.getCurrentPrice,
-    refetchInterval: PRICE_REFRESH_INTERVAL,
-  });
+  console.log('currentPrice', currentPrice);
 
-  const { data: historicalData, isLoading: isHistoricalLoading } = useQuery({
-    queryKey: ['historicalData'],
-    queryFn: api.getHistoricalData,
-    refetchInterval: PRICE_REFRESH_INTERVAL,
-  });
+  // Only fetch historical data from API
+  const { data: historicalDataFromAPI, isLoading: isHistoricalLoading } =
+    useQuery({
+      queryKey: ['historicalData'],
+      queryFn: api.getHistoricalData,
+      refetchInterval: 10000,
+    });
 
   useEffect(() => {
-    if (currentPrice) {
-      dispatch(updateProfitLoss(parseFloat(currentPrice.last)));
+    console.log('[useBitcoinPrice] Setting up Bitcoin price listener');
+
+    if (!BitcoinPriceModule) {
+      console.error(
+        '[useBitcoinPrice] Cannot setup listener - module not available',
+      );
+      return;
     }
-  }, [currentPrice, dispatch]);
+
+    // Start observing price updates
+    BitcoinPriceModule.startObserving()
+      .then(() => {
+        console.log('[useBitcoinPrice] Successfully started observing');
+      })
+      .catch((error: Error) => {
+        console.error('[useBitcoinPrice] Failed to start observing:', error);
+      });
+
+    const priceSubscription = eventEmitter.addListener(
+      'onPriceUpdate',
+      (price: number) => {
+        console.log('[useBitcoinPrice] Received price update:', price);
+        setCurrentPrice(price);
+        dispatch(updateProfitLoss(price));
+      },
+    );
+
+    const errorSubscription = eventEmitter.addListener(
+      'onError',
+      (error: string) => {
+        console.error('[useBitcoinPrice] Error from native module:', error);
+      },
+    );
+
+    const connectionSubscription = eventEmitter.addListener(
+      'onConnectionStateChange',
+      (state: string) => {
+        console.log('[useBitcoinPrice] Connection state changed:', state);
+      },
+    );
+
+    return () => {
+      console.log('Cleaning up Bitcoin price listener');
+      priceSubscription.remove();
+      errorSubscription.remove();
+      connectionSubscription.remove();
+    };
+  }, [dispatch]);
 
   const calculatePriceStats = (
     current: number | null,
@@ -50,7 +102,7 @@ export const useBitcoinPrice = (): PriceStats => {
       };
     }
 
-    const prevClose = historical[0].price; // Assuming first entry is 24h ago
+    const prevClose = historical[0].price;
     const change = current - prevClose;
     const changePercentage = (change / prevClose) * 100;
 
@@ -64,16 +116,18 @@ export const useBitcoinPrice = (): PriceStats => {
   };
 
   const stats = calculatePriceStats(
-    currentPrice ? parseFloat(currentPrice.last) : null,
-    historicalData || null,
+    currentPrice,
+    historicalDataFromAPI || null,
   );
 
   return {
-    currentPrice: currentPrice ? parseFloat(currentPrice.last) : null,
-    historicalData: historicalData ? historicalData.map(d => d.price) : null,
+    currentPrice,
+    historicalData: historicalDataFromAPI
+      ? historicalDataFromAPI.map(d => d.price)
+      : null,
     prevClose: stats.prevClose,
     priceChange: stats.priceChange,
-    isPriceLoading,
+    isPriceLoading: !currentPrice,
     isHistoricalLoading,
   };
 };

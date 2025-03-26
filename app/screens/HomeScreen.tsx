@@ -1,5 +1,12 @@
-import React, { useState } from 'react';
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native';
+import React, { useState, useCallback } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  TouchableOpacity,
+  Image,
+  Animated,
+} from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { useBitcoinPrice } from '../hooks/useBitcoinPrice';
@@ -17,6 +24,29 @@ export default function HomeScreen() {
   const { btcAmount, profitLoss, balance } = useSelector(
     (state: RootState) => state.portfolio,
   );
+
+  const [priceAnimation] = useState(new Animated.Value(1));
+
+  const animatePrice = useCallback(() => {
+    Animated.sequence([
+      Animated.timing(priceAnimation, {
+        toValue: 1.2,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+      Animated.timing(priceAnimation, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }),
+    ]).start();
+  }, [priceAnimation]);
+
+  React.useEffect(() => {
+    if (currentPrice) {
+      animatePrice();
+    }
+  }, [currentPrice, animatePrice]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -39,9 +69,13 @@ export default function HomeScreen() {
 
         <View style={styles.priceContainer}>
           <Text style={styles.btcLabel}>BTC</Text>
-          <Text style={styles.priceText}>
+          <Animated.Text
+            style={[
+              styles.priceText,
+              { transform: [{ scale: priceAnimation }] },
+            ]}>
             {currentPrice ? formatCurrency(currentPrice, 'EUR') : '...'}
-          </Text>
+          </Animated.Text>
 
           <Text
             style={[
