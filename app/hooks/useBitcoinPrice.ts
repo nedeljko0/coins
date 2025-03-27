@@ -28,8 +28,6 @@ interface PriceStats {
 export const useBitcoinPrice = (): PriceStats => {
   const dispatch = useDispatch();
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
-  const [historicalData, setHistoricalData] = useState<HistoricalData[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   console.log('currentPrice', currentPrice);
 
@@ -69,13 +67,6 @@ export const useBitcoinPrice = (): PriceStats => {
       },
     );
 
-    const errorSubscription = eventEmitter.addListener(
-      'onError',
-      (error: string) => {
-        console.error('[useBitcoinPrice] Error from native module:', error);
-      },
-    );
-
     const connectionSubscription = eventEmitter.addListener(
       'onConnectionStateChange',
       (state: string) => {
@@ -86,7 +77,6 @@ export const useBitcoinPrice = (): PriceStats => {
     return () => {
       console.log('Cleaning up Bitcoin price listener');
       priceSubscription.remove();
-      errorSubscription.remove();
       connectionSubscription.remove();
     };
   }, [dispatch]);
