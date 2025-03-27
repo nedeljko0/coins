@@ -14,7 +14,7 @@ export function TransactionList() {
     const isPositive = item.type === 'buy';
     const btcAmount = `${isPositive ? '+' : '-'}${item.amount.toFixed(4)} BTC`;
     const totalEurAmount = item.amount * item.price;
-    const eurAmount = `${isPositive ? '+' : '-'}${totalEurAmount.toFixed(2)} €`;
+    const eurAmount = `${isPositive ? '+' : '-'}${totalEurAmount} €`;
 
     return (
       <View style={styles.transactionItem}>
@@ -80,18 +80,18 @@ const styles = StyleSheet.create({
   amount: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#374151',
+    color: '#000000',
     marginLeft: 4,
   },
   price: {
     fontSize: 13,
     fontWeight: '500',
-    color: '#374151',
+    color: '#000000',
     textAlign: 'right',
   },
   timestamp: {
     fontSize: 11,
-    color: '#6B7280',
+    color: '#000000',
     textAlign: 'right',
   },
 });

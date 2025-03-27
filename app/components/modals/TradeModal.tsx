@@ -9,8 +9,9 @@ import {
   KeyboardAvoidingView,
   Platform,
 } from 'react-native';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import { executeTrade } from '../../store/features/portfolio';
+import { RootState } from '../../store';
 
 interface TradeModalProps {
   visible: boolean;
@@ -19,12 +20,7 @@ interface TradeModalProps {
 }
 
 const validateNumericInput = (value: string): boolean => {
-  // Allow empty string
-  if (value === '') {
-    return true;
-  }
-  // Allow numbers with optional decimal point
-  // This regex allows: "0", "1", "1.0", "0.01", but not ".", ".1", "1.", "1.1.1", "abc"
+  if (value === '') return true;
   return /^(?!0\d)\d*\.?\d*$/.test(value);
 };
 
@@ -36,9 +32,16 @@ export default function TradeModal({
   const dispatch = useDispatch();
   const [eurAmount, setEurAmount] = useState('');
   const [btcAmount, setBtcAmount] = useState('');
+  const [error, setError] = useState<string | null>(null);
+
+  const { balance, btcAmount: availableBtc } = useSelector(
+    (state: RootState) => state.portfolio,
+  );
 
   const handleEurChange = (value: string) => {
+    setError(null);
     if (!validateNumericInput(value)) {
+      setError('Please enter a valid number');
       return;
     }
 
@@ -48,7 +51,9 @@ export default function TradeModal({
   };
 
   const handleBtcChange = (value: string) => {
+    setError(null);
     if (!validateNumericInput(value)) {
+      setError('Please enter a valid number');
       return;
     }
 
@@ -57,20 +62,47 @@ export default function TradeModal({
     setEurAmount(numValue === 0 ? '' : (numValue * currentPrice).toFixed(2));
   };
 
+  const validateTrade = (type: 'buy' | 'sell', amount: number): boolean => {
+    if (amount <= 0) {
+      setError('Amount must be greater than 0');
+      return false;
+    }
+
+    const total = amount * currentPrice;
+    if (type === 'buy' && total > balance) {
+      setError('Insufficient balance');
+      return false;
+    }
+
+    if (type === 'sell' && amount > availableBtc) {
+      setError('Insufficient BTC');
+      return false;
+    }
+
+    return true;
+  };
+
   const handleTrade = (type: 'buy' | 'sell') => {
-    const amount = parseFloat(btcAmount);
-    if (amount > 0) {
-      dispatch(
-        executeTrade({
-          type,
-          amount,
-          price: currentPrice,
-        }),
-      );
+    try {
+      const amount = parseFloat(btcAmount);
+      if (!validateTrade(type, amount)) return;
+
+      dispatch(executeTrade({ type, amount, price: currentPrice }));
       onClose();
       setEurAmount('');
       setBtcAmount('');
+      setError(null);
+    } catch (err) {
+      setError('Failed to execute trade. Please try again.');
+      console.error('Trade error:', err);
     }
+  };
+
+  const handleClose = () => {
+    setError(null);
+    setEurAmount('');
+    setBtcAmount('');
+    onClose();
   };
 
   return (
@@ -78,14 +110,16 @@ export default function TradeModal({
       visible={visible}
       animationType="slide"
       transparent
-      onRequestClose={onClose}>
+      onRequestClose={handleClose}>
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
         style={styles.container}>
         <View style={styles.content}>
-          <TouchableOpacity style={styles.closeButton} onPress={onClose}>
+          <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
             <Text style={styles.closeButtonText}>✕</Text>
           </TouchableOpacity>
+
+          {error && <Text style={styles.errorText}>{error}</Text>}
 
           <View style={styles.inputContainer}>
             <TextInput
@@ -149,6 +183,12 @@ const styles = StyleSheet.create({
     color: '#000000',
     fontSize: 20,
     fontWeight: '600',
+  },
+  errorText: {
+    color: '#FF3B30',
+    textAlign: 'center',
+    marginBottom: 10,
+    fontSize: 14,
   },
   inputContainer: {
     flexDirection: 'row',
