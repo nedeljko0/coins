@@ -1,6 +1,6 @@
 import { portfolioSlice } from './slice';
 
-export const { executeTrade, updateProfitLoss } = portfolioSlice.actions;
+export const { executeTrade } = portfolioSlice.actions;
 export default portfolioSlice.reducer;
 
 export * from './types';

@@ -2,7 +2,6 @@ import { useEffect, useState } from 'react';
 import { NativeEventEmitter, NativeModules } from 'react-native';
 import { useDispatch } from 'react-redux';
 import { api, HistoricalData } from '../services/api';
-import { updateProfitLoss } from '../store/features/portfolio';
 import { useQuery } from '@tanstack/react-query';
 
 const { BitcoinPriceModule } = NativeModules;
@@ -29,9 +28,6 @@ export const useBitcoinPrice = (): PriceStats => {
   const dispatch = useDispatch();
   const [currentPrice, setCurrentPrice] = useState<number | null>(null);
 
-  console.log('currentPrice', currentPrice);
-
-  // Only fetch historical data from API
   const { data: historicalDataFromAPI, isLoading: isHistoricalLoading } =
     useQuery({
       queryKey: ['historicalData'],
@@ -63,7 +59,6 @@ export const useBitcoinPrice = (): PriceStats => {
       (price: number) => {
         console.log('[useBitcoinPrice] Received price update:', price);
         setCurrentPrice(price);
-        dispatch(updateProfitLoss(price));
       },
     );
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Dimensions, StyleSheet, Text } from 'react-native';
 import { LineChart, yAxisSides } from 'react-native-gifted-charts';
 import { fonts, fontWeights } from '../theme/fonts';
@@ -23,8 +23,9 @@ const getPrevClosePosition = (
   minValue: number,
   range: number,
 ) => ({
-  bottom: ((prevClose - minValue) / range) * 100,
-  //  transform: [{ translateY: -32 }],
+  bottom: `${((prevClose - minValue) / range) * 100}%` as const,
+  transform: [{ translateY: '50%' as const }],
+  position: 'absolute' as const,
 });
 
 export function PriceChart({ data, prevClose }: PriceChartProps) {
@@ -32,6 +33,16 @@ export function PriceChart({ data, prevClose }: PriceChartProps) {
     null,
   );
   const chartWidth = Dimensions.get('window').width - 80 - 32;
+
+  useEffect(() => {
+    if (selectedDataPoint !== null) {
+      const timer = setTimeout(() => {
+        setSelectedDataPoint(null);
+      }, 1000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [selectedDataPoint]);
 
   if (data.length < 2) {
     return (
@@ -208,7 +219,7 @@ const styles = StyleSheet.create({
   },
   pointerLabelContainer: {
     position: 'absolute',
-    top: 20,
+    top: 220,
     alignSelf: 'center',
     backgroundColor: 'transparent',
   },
@@ -220,12 +231,12 @@ const styles = StyleSheet.create({
   },
   pointerText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: fonts.regular,
   },
   yAxisText: {
     color: '#000000',
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: fonts.regular,
   },
   statsContainer: {
@@ -271,7 +282,7 @@ const styles = StyleSheet.create({
   },
   prevCloseValueText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: fonts.regular,
     fontWeight: fontWeights.medium,
   },
@@ -283,7 +294,7 @@ const styles = StyleSheet.create({
   },
   currentPriceText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: fonts.regular,
     fontWeight: fontWeights.medium,
   },
@@ -326,7 +337,7 @@ const styles = StyleSheet.create({
   },
   prevCloseLabelText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: fonts.regular,
     fontWeight: fontWeights.medium,
   },
@@ -336,6 +347,8 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderTopRightRadius: 4,
     borderBottomRightRadius: 4,
+    borderLeftWidth: 1,
+    borderLeftColor: 'white',
   },
   lastPriceLabel: {
     backgroundColor: 'rgba(78, 205, 196, 0.9)',
@@ -345,12 +358,12 @@ const styles = StyleSheet.create({
   },
   lastPriceText: {
     color: 'white',
-    fontSize: 12,
+    fontSize: 10,
     fontFamily: fonts.regular,
     fontWeight: fontWeights.medium,
   },
   yAxisValue: {
-    fontSize: 12,
+    fontSize: 10,
     color: '#000000',
     marginRight: 4,
     fontFamily: fonts.regular,

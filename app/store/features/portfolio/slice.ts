@@ -8,15 +8,6 @@ const initialState: PortfolioState = {
   profitLoss: 0,
 };
 
-const calculateInvested = (
-  transactions: PortfolioState['transactions'],
-): number => {
-  return transactions.reduce((acc, transaction) => {
-    const value = transaction.amount * transaction.price;
-    return transaction.type === 'buy' ? acc + value : acc - value;
-  }, 0);
-};
-
 export const portfolioSlice = createSlice({
   name: 'portfolio',
   initialState,
@@ -46,6 +37,10 @@ export const portfolioSlice = createSlice({
         } else {
           state.balance += total;
           state.btcAmount -= amount;
+          // For sells, calculate profit/loss based on the difference from previous trades
+          const lastBuyPrice =
+            state.transactions.find(t => t.type === 'buy')?.price || price;
+          state.profitLoss += amount * (price - lastBuyPrice);
         }
 
         state.transactions.unshift({
@@ -57,11 +52,8 @@ export const portfolioSlice = createSlice({
         });
       }
     },
-    updateProfitLoss: (state, action: PayloadAction<number>) => {
-      const currentPrice = action.payload;
-      const totalValue = state.btcAmount * currentPrice;
-      const invested = calculateInvested(state.transactions);
-      state.profitLoss = totalValue - invested;
-    },
   },
 });
+
+export const { executeTrade } = portfolioSlice.actions;
+export default portfolioSlice.reducer;
