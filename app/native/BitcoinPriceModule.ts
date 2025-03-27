@@ -8,9 +8,6 @@ const LINKING_ERROR =
 
 const { BitcoinPriceModule } = NativeModules;
 
-console.log('Native modules available:', Object.keys(NativeModules));
-console.log('BitcoinPriceModule:', BitcoinPriceModule);
-
 const BitcoinPriceNativeModule = BitcoinPriceModule
   ? BitcoinPriceModule
   : new Proxy(
@@ -34,21 +31,16 @@ export interface PriceUpdate {
 
 class BitcoinPriceEmitter extends NativeEventEmitter {
   constructor() {
-    console.log('Initializing BitcoinPriceEmitter...');
     super(BitcoinPriceNativeModule);
-    console.log('Calling startObserving...');
     try {
       BitcoinPriceNativeModule.startObserving();
-      console.log('startObserving called successfully');
     } catch (error) {
       console.error('Error calling startObserving:', error);
     }
   }
 
   addPriceListener(callback: (update: PriceUpdate) => void) {
-    console.log('Adding price listener...');
     return this.addListener('onPriceUpdate', (event: any) => {
-      console.log('Raw price update event:', event);
       callback(event);
     });
   }

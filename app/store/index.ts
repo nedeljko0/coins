@@ -1,12 +1,16 @@
-import { configureStore, Middleware } from '@reduxjs/toolkit';
+import { configureStore, Middleware, Action } from '@reduxjs/toolkit';
 import portfolioReducer from './features/portfolio';
 
 const logger: Middleware = store => next => action => {
-  console.log('Dispatching:', JSON.stringify(action, null, 2));
-  const result = next(action);
-  console.log('Next State:', JSON.stringify(store.getState(), null, 2));
-  console.log('Is development mode:', __DEV__);
-  return result;
+  if (__DEV__) {
+    console.group((action as Action).type);
+    console.info('dispatching', action);
+    const result = next(action);
+    console.info('next state', store.getState());
+    console.groupEnd();
+    return result;
+  }
+  return next(action);
 };
 
 export const store = configureStore({
@@ -14,7 +18,6 @@ export const store = configureStore({
     portfolio: portfolioReducer,
   },
   middleware: getDefaultMiddleware => getDefaultMiddleware().concat(logger),
-  devTools: __DEV__,
 });
 
 export type RootState = ReturnType<typeof store.getState>;

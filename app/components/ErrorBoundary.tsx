@@ -1,5 +1,6 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
+import { fonts, fontWeights } from '../theme/fonts';
 
 interface Props {
   children: ReactNode;
@@ -57,12 +58,14 @@ const styles = StyleSheet.create({
   },
   title: {
     fontSize: 20,
-    fontWeight: 'bold',
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.bold,
     marginBottom: 10,
     color: '#333',
   },
   message: {
     fontSize: 16,
+    fontFamily: fonts.regular,
     textAlign: 'center',
     marginBottom: 20,
     color: '#666',
@@ -76,6 +79,7 @@ const styles = StyleSheet.create({
   buttonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.semiBold,
   },
 });

@@ -11,11 +11,11 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 import { useBitcoinPrice } from '../hooks/useBitcoinPrice';
 import { PriceChart } from '../components/Chart';
-
-import { formatCurrency } from '../utils/formatters';
+import { formatCurrency, formatPrice } from '../utils/formatters';
 import TradeModal from '../components/modals/TradeModal';
 import { RootState } from '../store';
 import { TransactionList } from '../components/TransactionList';
+import { fonts, fontWeights } from '../theme/fonts';
 
 export default function HomeScreen() {
   const [isTradeModalVisible, setTradeModalVisible] = useState(false);
@@ -24,6 +24,8 @@ export default function HomeScreen() {
   const { btcAmount, profitLoss, balance } = useSelector(
     (state: RootState) => state.portfolio,
   );
+
+  console.log('currentPrice is', currentPrice);
 
   const [priceAnimation] = useState(new Animated.Value(1));
 
@@ -54,15 +56,31 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <View style={styles.logo}>
             <Image
-              source={require('../assets/bison.png')}
+              source={require('../../assets/bison.png')}
               style={styles.logoImage}
             />
           </View>
           <View style={styles.balance}>
             <Text style={styles.balanceLabel}>Available</Text>
-            <Text style={styles.balanceAmount}>{btcAmount.toFixed(8)} BTC</Text>
+            <Text style={styles.balanceAmount}>
+              <Text style={styles.numberPart}>
+                {Number(btcAmount).toLocaleString('en-US', {
+                  minimumFractionDigits: 8,
+                  maximumFractionDigits: 8,
+                  useGrouping: false,
+                })}
+              </Text>
+              <Text style={styles.currencyPart}> BTC</Text>
+            </Text>
             <Text style={styles.balanceEur}>
-              {formatCurrency(balance, 'EUR')}
+              <Text style={styles.numberPart}>
+                {Number(balance).toLocaleString('en-US', {
+                  minimumFractionDigits: 0,
+                  maximumFractionDigits: 2,
+                  useGrouping: false,
+                })}
+              </Text>
+              <Text style={styles.currencyPart}> EUR</Text>
             </Text>
           </View>
         </View>
@@ -74,15 +92,18 @@ export default function HomeScreen() {
               styles.priceText,
               { transform: [{ scale: priceAnimation }] },
             ]}>
-            {currentPrice ? formatCurrency(currentPrice, 'EUR') : '...'}
+            {currentPrice ? formatPrice(currentPrice) : '...'}
           </Animated.Text>
 
           <Text
             style={[
-              styles.pnlText,
+              styles.pnlLabel,
               profitLoss >= 0 ? styles.profit : styles.loss,
             ]}>
-            PnL: {formatCurrency(profitLoss, 'EUR')}
+            PnL:{' '}
+            <Text style={styles.pnlText}>
+              {formatCurrency(profitLoss, '€')}
+            </Text>
           </Text>
         </View>
         {historicalData && (
@@ -122,7 +143,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    paddingHorizontal: 16,
+    paddingHorizontal: 26,
     paddingTop: 8,
   },
   logo: {
@@ -142,15 +163,18 @@ const styles = StyleSheet.create({
   balanceLabel: {
     color: '#000000',
     fontSize: 12,
+    fontFamily: fonts.regular,
   },
   balanceAmount: {
     color: '#000000',
-    fontSize: 14,
-    fontWeight: '600',
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.semiBold,
   },
   balanceEur: {
     color: '#000000',
     fontSize: 12,
+    fontFamily: fonts.regular,
   },
   priceContainer: {
     alignItems: 'center',
@@ -158,18 +182,26 @@ const styles = StyleSheet.create({
   },
   btcLabel: {
     color: '#202020',
-    fontSize: 18,
-    fontWeight: '600',
+    fontSize: 24,
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.semiBold,
   },
   priceText: {
     color: '#202020',
-    fontSize: 32,
-    fontWeight: 'bold',
+    fontSize: 24,
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.semiBold,
     marginVertical: 8,
   },
+  pnlLabel: {
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.regular,
+  },
   pnlText: {
-    fontSize: 16,
-    fontWeight: '600',
+    fontSize: 12,
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.semiBold,
   },
   profit: {
     color: '#4CAF50',
@@ -179,15 +211,24 @@ const styles = StyleSheet.create({
   },
   tradeButton: {
     backgroundColor: '#153243',
-    marginHorizontal: 16,
+    marginHorizontal: 26,
     marginVertical: 4,
     padding: 16,
-    borderRadius: 8,
+    borderRadius: 4,
     alignItems: 'center',
   },
   tradeButtonText: {
     color: '#fff',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.semiBold,
+  },
+  numberPart: {
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.regular,
+  },
+  currencyPart: {
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.semiBold,
   },
 });

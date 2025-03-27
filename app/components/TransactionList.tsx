@@ -4,6 +4,8 @@ import { useSelector } from 'react-redux';
 import { RootState } from '../store';
 import { formatDateTime } from '../utils/dateUtils';
 import { Transaction } from '../store/features/portfolio';
+import { formatCurrency } from '../utils/formatters';
+import { fonts, fontWeights } from '../theme/fonts';
 
 export function TransactionList() {
   const transactions = useSelector(
@@ -14,19 +16,26 @@ export function TransactionList() {
     const isPositive = item.type === 'buy';
     const btcAmount = `${isPositive ? '+' : '-'}${item.amount.toFixed(4)} BTC`;
     const totalEurAmount = item.amount * item.price;
-    const eurAmount = `${isPositive ? '+' : '-'}${totalEurAmount} €`;
+    const eurAmount = `${isPositive ? '+' : '-'}${formatCurrency(
+      totalEurAmount,
+      '€',
+    )}`;
 
     return (
       <View style={styles.transactionItem}>
-        <View style={styles.leftContent}>
+        <View style={styles.column}>
           <Text style={styles.type}>
             {item.type.charAt(0).toUpperCase() + item.type.slice(1)}
           </Text>
+        </View>
+        <View style={styles.middleColumn}>
           <Text style={styles.amount}>
-            {btcAmount} / {eurAmount}
+            {btcAmount}
+            <Text style={styles.separator}> / </Text>
+            {eurAmount}
           </Text>
         </View>
-        <View style={styles.rightContent}>
+        <View style={styles.dateColumn}>
           <Text style={styles.timestamp}>{formatDateTime(item.timestamp)}</Text>
         </View>
       </View>
@@ -51,7 +60,7 @@ export function TransactionList() {
 const styles = StyleSheet.create({
   container: {
     backgroundColor: '#F3F3F3',
-    marginHorizontal: 24,
+    marginHorizontal: 26,
     borderRadius: 12,
     paddingVertical: 16,
     flexGrow: 0,
@@ -60,38 +69,56 @@ const styles = StyleSheet.create({
   },
   transactionItem: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
     paddingVertical: 8,
     paddingHorizontal: 16,
-  },
-  leftContent: {
-    flex: 1,
-    flexDirection: 'row',
     alignItems: 'center',
   },
-  rightContent: {
-    alignItems: 'flex-end',
+  column: {
+    width: 60,
     justifyContent: 'center',
   },
   type: {
-    fontSize: 13,
-    width: 28,
+    fontSize: 12,
+    textAlign: 'left',
+    fontFamily: fonts.regular,
   },
   amount: {
-    fontSize: 13,
-    fontWeight: '500',
-    color: '#000000',
-    marginLeft: 4,
+    fontSize: 12,
+    textAlign: 'center',
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.semiBold,
   },
-  price: {
-    fontSize: 13,
-    fontWeight: '500',
+  btcAmount: {
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.medium,
     color: '#000000',
-    textAlign: 'right',
+  },
+  eurAmount: {
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.medium,
+    color: '#000000',
+  },
+  separator: {
+    color: '#000000',
+    opacity: 0.5,
+    fontFamily: fonts.regular,
   },
   timestamp: {
-    fontSize: 11,
+    fontSize: 12,
     color: '#000000',
     textAlign: 'right',
+    fontFamily: fonts.regular,
+  },
+  dateColumn: {
+    width: 80,
+    justifyContent: 'center',
+  },
+  middleColumn: {
+    flex: 1,
+    justifyContent: 'center',
+  },
+  rightColumn: {
+    flex: 1,
+    justifyContent: 'center',
   },
 });

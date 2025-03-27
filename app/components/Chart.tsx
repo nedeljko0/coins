@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { View, Dimensions, StyleSheet, Text } from 'react-native';
 import { LineChart, yAxisSides } from 'react-native-gifted-charts';
+import { fonts, fontWeights } from '../theme/fonts';
 
 interface PriceChartProps {
   data: number[];
@@ -30,7 +31,7 @@ export function PriceChart({ data, prevClose }: PriceChartProps) {
   const [selectedDataPoint, setSelectedDataPoint] = useState<number | null>(
     null,
   );
-  const chartWidth = Dimensions.get('window').width - 80;
+  const chartWidth = Dimensions.get('window').width - 80 - 32;
 
   if (data.length < 2) {
     return (
@@ -51,9 +52,6 @@ export function PriceChart({ data, prevClose }: PriceChartProps) {
     value: value - minValue,
     showValue: value,
   }));
-
-  console.log('prev close', prevClose);
-  console.log('last price', lastPrice);
 
   // Calculate evenly distributed values for the y-axis
   const getYAxisLabels = () => {
@@ -191,7 +189,7 @@ const styles = StyleSheet.create({
     marginTop: 16,
     backgroundColor: 'white',
     borderRadius: 0,
-    padding: 8,
+    paddingHorizontal: 26,
     alignItems: 'center',
     position: 'relative',
   },
@@ -200,12 +198,13 @@ const styles = StyleSheet.create({
     marginTop: 32,
     backgroundColor: '#4ECDC4',
     borderRadius: 8,
-    marginHorizontal: 16,
+    marginHorizontal: 26,
     justifyContent: 'center',
     alignItems: 'center',
   },
   noDataText: {
     color: 'white',
+    fontFamily: fonts.regular,
   },
   pointerLabelContainer: {
     position: 'absolute',
@@ -222,25 +221,29 @@ const styles = StyleSheet.create({
   pointerText: {
     color: 'white',
     fontSize: 12,
+    fontFamily: fonts.regular,
   },
   yAxisText: {
     color: '#000000',
     fontSize: 12,
+    fontFamily: fonts.regular,
   },
   statsContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     width: '100%',
-    paddingHorizontal: 16,
+    paddingHorizontal: 26,
     marginBottom: 8,
   },
   prevCloseText: {
     fontSize: 12,
     color: '#666',
+    fontFamily: fonts.regular,
   },
   changeText: {
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.medium,
   },
   positiveChange: {
     color: '#4ECDC4',
@@ -269,7 +272,8 @@ const styles = StyleSheet.create({
   prevCloseValueText: {
     color: 'white',
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.medium,
   },
   currentPriceLabel: {
     backgroundColor: 'rgba(78, 205, 196, 0.9)',
@@ -280,7 +284,8 @@ const styles = StyleSheet.create({
   currentPriceText: {
     color: 'white',
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.medium,
   },
   chartWrapper: {
     flexDirection: 'row',
@@ -322,7 +327,8 @@ const styles = StyleSheet.create({
   prevCloseLabelText: {
     color: 'white',
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.medium,
   },
   prevCloseValueBox: {
     backgroundColor: '#4ECDC4',
@@ -340,11 +346,13 @@ const styles = StyleSheet.create({
   lastPriceText: {
     color: 'white',
     fontSize: 12,
-    fontWeight: '500',
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.medium,
   },
   yAxisValue: {
     fontSize: 12,
     color: '#000000',
     marginRight: 4,
+    fontFamily: fonts.regular,
   },
 });

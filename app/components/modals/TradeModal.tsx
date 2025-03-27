@@ -8,10 +8,12 @@ import {
   TextInput,
   KeyboardAvoidingView,
   Platform,
+  Image,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { executeTrade } from '../../store/features/portfolio';
 import { RootState } from '../../store';
+import { fonts, fontWeights } from '../../theme/fonts';
 
 interface TradeModalProps {
   visible: boolean;
@@ -20,7 +22,9 @@ interface TradeModalProps {
 }
 
 const validateNumericInput = (value: string): boolean => {
-  if (value === '') return true;
+  if (value === '') {
+    return true;
+  }
   return /^(?!0\d)\d*\.?\d*$/.test(value);
 };
 
@@ -85,7 +89,9 @@ export default function TradeModal({
   const handleTrade = (type: 'buy' | 'sell') => {
     try {
       const amount = parseFloat(btcAmount);
-      if (!validateTrade(type, amount)) return;
+      if (!validateTrade(type, amount)) {
+        return;
+      }
 
       dispatch(executeTrade({ type, amount, price: currentPrice }));
       onClose();
@@ -116,7 +122,10 @@ export default function TradeModal({
         style={styles.container}>
         <View style={styles.content}>
           <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-            <Text style={styles.closeButtonText}>✕</Text>
+            <Image
+              source={require('../../../assets/close.png')}
+              style={styles.closeButtonImage}
+            />
           </TouchableOpacity>
 
           {error && <Text style={styles.errorText}>{error}</Text>}
@@ -171,43 +180,53 @@ const styles = StyleSheet.create({
   },
   content: {
     backgroundColor: '#fff',
-    margin: 20,
-    borderRadius: 20,
-    padding: 20,
+    margin: 26,
+    borderRadius: 12,
+    paddingHorizontal: 26,
+    paddingVertical: 20,
   },
   closeButton: {
     alignSelf: 'flex-end',
-    padding: 10,
+    marginBottom: 8,
   },
-  closeButtonText: {
-    color: '#000000',
-    fontSize: 20,
-    fontWeight: '600',
+  closeButtonImage: {
+    width: 24,
+    height: 24,
   },
   errorText: {
     color: '#FF3B30',
     textAlign: 'center',
     marginBottom: 10,
     fontSize: 14,
+    fontFamily: fonts.regular,
   },
   inputContainer: {
     flexDirection: 'row',
     alignItems: 'center',
+    justifyContent: 'center',
     backgroundColor: '#0000000A',
     borderRadius: 10,
     marginVertical: 10,
-    paddingHorizontal: 15,
+    paddingHorizontal: 26,
+    height: 48,
   },
   input: {
     flex: 1,
     color: '#000000',
-    fontSize: 24,
-    padding: 15,
+    fontSize: 16,
+    textAlign: 'right',
+    borderBottomWidth: 1,
+    borderBottomColor: '#0000003D',
+    height: 28,
+    marginTop: 1,
+    fontFamily: fonts.regular,
   },
   currencyLabel: {
     color: '#74CDDC',
-    fontSize: 16,
+    fontSize: 12,
     marginLeft: 10,
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.bold,
   },
   buttonContainer: {
     flexDirection: 'row',
@@ -217,7 +236,7 @@ const styles = StyleSheet.create({
   button: {
     flex: 1,
     padding: 15,
-    borderRadius: 10,
+    borderRadius: 4,
     marginHorizontal: 5,
   },
   buyButton: {
@@ -230,6 +249,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     textAlign: 'center',
     fontSize: 16,
-    fontWeight: '600',
+    fontFamily: fonts.regular,
+    fontWeight: fontWeights.semiBold,
   },
 });
